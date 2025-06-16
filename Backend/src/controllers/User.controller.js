@@ -65,7 +65,8 @@ const loginuser = asynchandler(async (req, res) => {
     const tokens = await generate(currentuser._id)
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'None'
     }
     return res.status(200)
         .cookie("refreshtoken", tokens.refreshtoken, options)
@@ -126,7 +127,8 @@ const refreshaccesstoken = asynchandler(async (req, res) => {
     const newrefreshtoken = await currentuser.generaterefreshtoken()
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'None'
     }
     console.log(newaccesstoken,"in refreshaccesstoken")
     return res.status(200)
