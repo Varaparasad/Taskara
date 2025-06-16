@@ -12,7 +12,7 @@ import {
     getuser,
     getprojects_user,
     updateuser
-} from "../controllers/user.controller.js";
+} from "../controllers/User.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 route.post('/signup', registeruser)
