@@ -1,7 +1,7 @@
 # Dependency directories
 node_modules/
-frontend/node_modules/
-backend/node_modules/
+Frontend/node_modules/
+Backend/node_modules/
 
 # Logs
 *.log
@@ -17,8 +17,8 @@ Backend/.env
 # Build output
 dist/
 build/
-frontend/build/
-backend/dist/
+Frontend/build/
+Backend/dist/
 
 # OS / Editor junk
 .DS_Store
