@@ -10,15 +10,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // 
 app.use(cors({
-  origin: 'http://localhost:5173', // your frontend
+  origin: process.env.CORS_ORIGIN, // your frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true // allow cookies or authorization headers if used
 }));
 
-app.use(cors({
-  origin: process.env.CORS_ORIGIN,  // your frontend URL
-  credentials: true                // allow cookies to be sent
-}));
 
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
