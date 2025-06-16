@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, ArrowLeft, CalendarDays, User, Folder, ClipboardCopy, MessageSquare, Send, Paperclip, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 // Helper functions (reused from other components for consistency)
 const getPriorityColorClass = (priority) => {
@@ -37,7 +39,7 @@ const fetchSingleTicketDetails = async ({ queryKey }) => {
   const [, ticketID] = queryKey;
   if (!ticketID) throw new Error("Ticket ID is required");
   try {
-    const res = await axios.get(`http://localhost:3000/ticket/${ticketID}`, { withCredentials: true });
+    const res = await axios.get(`${BACKEND_URL}/ticket/${ticketID}`, { withCredentials: true });
     return res.data.data;
   } catch (err) {
     console.error(`Error fetching ticket details for ID ${ticketID}:`, err);
@@ -50,7 +52,7 @@ const fetchUserDetails = async ({ queryKey }) => {
   const [, userID] = queryKey;
   if (!userID) throw new Error("User ID is required");
   try {
-    const res = await axios.get(`http://localhost:3000/user/${userID}`, { withCredentials: true });
+    const res = await axios.get(`${BACKEND_URL}/user/${userID}`, { withCredentials: true });
     return res.data.data; // Assuming your API returns user data under `data.data`
   } catch (err) {
     console.error(`Error fetching user details for ID ${userID}:`, err);

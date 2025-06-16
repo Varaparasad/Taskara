@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Sidebar from '../components/Sidebar.jsx'; // Adjust path as necessary
 import Topbar from '../components/Topbar.jsx';
 import MessageOverlay from '../components/MessageOverlay.jsx'; // Path to the MessageOverlay component
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Import Lucide React icons
 import {
@@ -13,7 +14,7 @@ import {
 import { format } from 'date-fns';
 
 const fetchUserData = async () => {
-    const res = await axios.get('http://localhost:3000/user/data', { withCredentials: true });
+    const res = await axios.get(`${BACKEND_URL}/user/data`, { withCredentials: true });
     return res.data.user;
 };
 
@@ -87,7 +88,7 @@ const Profile = () => {
             return;
         }
         try {
-            await axios.put('http://localhost:3000/user/update', { name: editName }, { withCredentials: true });
+            await axios.put(`${BACKEND_URL}/user/update`, { name: editName }, { withCredentials: true });
             showMessage('Name updated successfully!', 'success');
             queryClient.invalidateQueries(['userData']); // Invalidate cache to refetch
             setShowEditNameModal(false);
@@ -108,7 +109,7 @@ const Profile = () => {
             return;
         }
         try {
-            await axios.put('http://localhost:3000/user/update', { email: editEmail }, { withCredentials: true });
+            await axios.put('${BACKEND_URL}/user/update', { email: editEmail }, { withCredentials: true });
             showMessage('Email updated successfully!', 'success');
             queryClient.invalidateQueries(['userData']);
             setShowEditEmailModal(false);
@@ -132,7 +133,7 @@ const Profile = () => {
             return;
         }
         try {
-            await axios.put('http://localhost:3000/user/update', { oldPassword, newPassword }, { withCredentials: true });
+            await axios.put('${BACKEND_URL}/user/update', { oldPassword, newPassword }, { withCredentials: true });
             showMessage('Password updated successfully!', 'success');
             setOldPassword('');
             setNewPassword('');
@@ -150,7 +151,7 @@ const Profile = () => {
             return;
         }
         try {
-            await axios.put('http://localhost:3000/user/update', { profilePic: profilePicInput }, { withCredentials: true });
+            await axios.put(`${BACKEND_URL}/user/update`, { profilePic: profilePicInput }, { withCredentials: true });
             showMessage('Profile picture updated successfully!', 'success');
             queryClient.invalidateQueries(['userData']);
             setShowEditProfilePicModal(false);

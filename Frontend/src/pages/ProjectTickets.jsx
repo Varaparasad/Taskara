@@ -6,6 +6,8 @@ import Topbar from '../components/Topbar';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Kanban, PlusCircle, XCircle, LayoutDashboard, CalendarDays, ChevronRight } from 'lucide-react'; // Added ListChecks for project summary
 import { format } from 'date-fns';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 // Helper functions (reused from InsideProject.jsx)
 const getPriorityColorClass = (priority) => {
@@ -38,7 +40,7 @@ const getTicketStatusColorClass = (status) => {
 const fetchUserDetailsById = async (userId) => {
   if (!userId) return null;
   try {
-    const res = await axios.get(`http://localhost:3000/user/${userId}`, { withCredentials: true });
+    const res = await axios.get(`${BACKEND_URL}/user/${userId}`, { withCredentials: true });
     return res.data.data;
   } catch (err) {
     console.error(`Error fetching user details for ID ${userId}:`, err);
@@ -51,7 +53,7 @@ const fetchProjectDetailsForMembers = async ({ queryKey }) => {
   if (!projectID) return null;
 
   try {
-    const projectRes = await axios.get(`http://localhost:3000/project/${projectID}`, { withCredentials: true });
+    const projectRes = await axios.get(`${BACKEND_URL}/project/${projectID}`, { withCredentials: true });
     const project = projectRes.data.data;
 
     // Fetch details for each member to get their names/emails for assignee suggestions
@@ -78,7 +80,7 @@ const fetchProjectTickets = async ({ queryKey }) => {
   if (!projectID) return [];
 
   try {
-    const ticketRes = await axios.get(`http://localhost:3000/project/${projectID}/tickets`, { withCredentials: true });
+    const ticketRes = await axios.get(`${BACKEND_URL}/project/${projectID}/tickets`, { withCredentials: true });
     const tickets = ticketRes.data.data;
 
     const ticketsWithAssigneeNames = await Promise.all(
@@ -103,7 +105,7 @@ const fetchMyTickets = async ({ queryKey }) => {
   const [, projectID] = queryKey;
   if (!projectID) return [];
   try {
-    const res = await axios.get(`http://localhost:3000/project/${projectID}/mytickets`, { withCredentials: true });
+    const res = await axios.get(`${BACKEND_URL}/project/${projectID}/mytickets`, { withCredentials: true });
     const myTickets = res.data.data;
     // We still need assigneeName populated on the frontend if the backend doesn't populate it
     const myTicketsWithAssigneeNames = await Promise.all(
@@ -219,7 +221,7 @@ const ProjectTickets = () => {
 
     try {
       await axios.post(
-        `http://localhost:3000/project/${projectID}/createticket`,
+        `${BACKEND_URL}/project/${projectID}/createticket`,
         {
           title: ticketTitle,
           description: ticketDescription,

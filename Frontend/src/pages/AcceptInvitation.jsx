@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 const AcceptInvitation = () => {
     const { projectID, token } = useParams();
     const navigate = useNavigate();
@@ -10,7 +12,7 @@ const AcceptInvitation = () => {
     useEffect(() => {
         const acceptInvitation = async () => {
             try {
-                const response = await axios.put(`http://localhost:3000/project/accept-invitation/${projectID}/${token}`); 
+                const response = await axios.put(`${BACKEND_URL}/project/accept-invitation/${projectID}/${token}`); 
                 console.log(response.data.message);
                 alert(response.data.message);
                 navigate('/'); 

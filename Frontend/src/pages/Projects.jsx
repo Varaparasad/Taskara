@@ -7,25 +7,28 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import axios from 'axios';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 const fetchUserProjects = async () => {
-  const res = await axios.get('http://localhost:3000/user/data', { withCredentials: true });
+  // Update this line to use BACKEND_URL
+  const res = await axios.get(`${BACKEND_URL}/user/data`, { withCredentials: true });
   return res.data.user.projects || [];
 };
 
 const fetchProjectDetails = async (projectId) => {
-  const res = await axios.get(`http://localhost:3000/project/${projectId}`, { withCredentials: true });
+  const res = await axios.get(`${BACKEND_URL}/project/${projectId}`, { withCredentials: true });
   return res.data.data;
 };
 
 const fetchProjectTickets = async (projectId) => {
-  const res = await axios.get(`http://localhost:3000/project/${projectId}/tickets`, { withCredentials: true });
+  const res = await axios.get(`${BACKEND_URL}/project/${projectId}/tickets`, { withCredentials: true });
   console.log(res.data.data,"in fetchProjectTickets");
   return res.data.data || [];
 };
 
 const fetchUserName = async (userId) => {
   if (!userId) return 'N/A';
-  const res = await axios.get(`http://localhost:3000/user/${userId}`, { withCredentials: true });
+  const res = await axios.get(`${BACKEND_URL}/user/${userId}`, { withCredentials: true });
   return res.data.data ? (res.data.data.name || res.data.data.username) : "Unknown User";
 };
 

@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 
+const BACKEND_URL =import.meta.env.VITE_BACKEND_URL;
 
 const fetchUserData = async () => {
         try {
-            const res = await axios.get('http://localhost:3000/user/data', { withCredentials: true });
+            const res = await axios.get(`${BACKEND_URL}/user/data`, { withCredentials: true });
             return res.data.user || {};
         } catch (err) {
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { X, Plus, LayoutGrid, Briefcase, List } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
@@ -13,7 +14,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     const fetchUserData = async () => {
 
         try {
-            const response = await axios.get("http://localhost:3000/user/data",
+            const response = await axios.get(`${BACKEND_URL}/user/data`,
             {
                 withCredentials: true,
             }

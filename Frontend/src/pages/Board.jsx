@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Kanban, PlusCircle, XCircle, CalendarDays, Pencil, User, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Helper functions (reused from ProjectTicketsPage.jsx)
 const getPriorityColorClass = (priority) => {
@@ -39,7 +40,7 @@ const getTicketStatusColorClass = (status) => {
 const fetchUserDetailsById = async (userId) => {
   if (!userId) return null;
   try {
-    const res = await axios.get(`http://localhost:3000/user/${userId}`, { withCredentials: true });
+    const res = await axios.get(`${BACKEND_URL}/user/${userId}`, { withCredentials: true });
     return res.data.data;
   } catch (err) {
     console.error(`Error fetching user details for ID ${userId}:`, err);
@@ -50,7 +51,7 @@ const fetchUserDetailsById = async (userId) => {
 
 const fetchCurrentUser = async () => {
   try {
-    const res = await axios.get('http://localhost:3000/user/data', { withCredentials: true });
+    const res = await axios.get(`${BACKEND_URL}/user/data`, { withCredentials: true });
     // console.log(res.data.user)
     return res.data.user;
   } catch (err) {
@@ -65,7 +66,7 @@ const fetchProjectDetailsForMembers = async ({ queryKey }) => {
   if (!projectID) return null;
 
   try {
-    const projectRes = await axios.get(`http://localhost:3000/project/${projectID}`, { withCredentials: true });
+    const projectRes = await axios.get(`${BACKEND_URL}/project/${projectID}`, { withCredentials: true });
     const project = projectRes.data.data;
 
     const membersWithDetails = await Promise.all(
@@ -91,7 +92,7 @@ const fetchProjectTickets = async ({ queryKey }) => {
   if (!projectID) return [];
 
   try {
-    const ticketRes = await axios.get(`http://localhost:3000/project/${projectID}/tickets`, { withCredentials: true });
+    const ticketRes = await axios.get(`${BACKEND_URL}/project/${projectID}/tickets`, { withCredentials: true });
     const tickets = ticketRes.data.data;
 
     const ticketsWithAssigneeNames = await Promise.all(
@@ -215,7 +216,7 @@ const Board = () => {
 
     try {
       await axios.post(
-        `http://localhost:3000/project/${projectID}/createticket`,
+        `${BACKEND_URL}/project/${projectID}/createticket`,
         {
           title: ticketTitle,
           description: ticketDescription,
@@ -243,7 +244,7 @@ const Board = () => {
 
     try {
       await axios.put(
-        `http://localhost:3000/ticket/${editingTicket._id}`, // Endpoint for updating ticket
+        `${BACKEND_URL}/ticket/${editingTicket._id}`, // Endpoint for updating ticket
         {
           title: ticketTitle,
           description: ticketDescription,
@@ -294,7 +295,7 @@ const Board = () => {
     try {
       
       await axios.put(
-        `http://localhost:3000/ticket/${draggableId}/changestatus`,
+        `${BACKEND_URL}/ticket/${draggableId}/changestatus`,
         { status: newStatus },
         { withCredentials: true }
       );

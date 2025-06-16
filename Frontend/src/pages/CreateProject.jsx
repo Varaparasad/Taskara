@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query'; // Import useMutation and useQueryClient
 import { Loader2 } from 'lucide-react'; // For loading spinner
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const CreateProject = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,7 +20,7 @@ const CreateProject = () => {
   // Define the mutation function for creating a project
   const createProjectMutation = useMutation({
     mutationFn: async (newProjectData) => {
-      const response = await axios.post("http://localhost:3000/project/create", newProjectData, { withCredentials: true });
+      const response = await axios.post(`${BACKEND_URL}/project/create`, newProjectData, { withCredentials: true });
       if (!response.data.success) {
         throw new Error(response.data.message || "Failed to create project");
       }

@@ -8,6 +8,7 @@ import { User, Loader2, Calendar, ListChecks, Kanban, Edit, Trash2, UserMinus } 
 import { format } from 'date-fns';
 import { Pie, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
+const BACKEND_URL =import.meta.env.VITE_BACKEND_URL;
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
@@ -45,7 +46,7 @@ const getTicketStatusColorClass = (status) => {
 const fetchUserDetailsById = async (userId) => {
   if (!userId) return null;
   try {
-    const res = await axios.get(`http://localhost:3000/user/${userId}`, { withCredentials: true });
+    const res = await axios.get(`${BACKEND_URL}/user/${userId}`, { withCredentials: true });
     return res.data.data;
   } catch (err) {
     console.error(`Error fetching user details for ID ${userId}:`, err);
@@ -57,7 +58,7 @@ const fetchProjectDetails = async ({ queryKey }) => {
   const [, projectID] = queryKey;
   if (!projectID) return null;
 
-  const projectRes = await axios.get(`http://localhost:3000/project/${projectID}`, { withCredentials: true });
+  const projectRes = await axios.get(`${BACKEND_URL}/project/${projectID}`, { withCredentials: true });
   const project = projectRes.data.data;
 
   let managerDetails = null;
@@ -84,7 +85,7 @@ const fetchProjectTickets = async ({ queryKey }) => {
   const [, projectID] = queryKey;
   if (!projectID) return [];
 
-  const ticketRes = await axios.get(`http://localhost:3000/project/${projectID}/tickets`, { withCredentials: true });
+  const ticketRes = await axios.get(`${BACKEND_URL}/project/${projectID}/tickets`, { withCredentials: true });
   const tickets = ticketRes.data.data;
 
   const ticketsWithAssigneeNames = await Promise.all(
@@ -167,7 +168,7 @@ const InsideProject = () => {
         return;
       }
       try {
-        const res = await axios.get('http://localhost:3000/user/allemails', { withCredentials: true });
+        const res = await axios.get(`${BACKEND_URL}/user/allemails`, { withCredentials: true });
         const filtered = res.data.data.filter(email =>
           email.toLowerCase().includes(searchInput.toLowerCase())
         );
@@ -219,7 +220,7 @@ const InsideProject = () => {
     }
     try {
       await axios.put(
-        `http://localhost:3000/project/${projectID}/addmember`,
+        `${BACKEND_URL}/project/${projectID}/addmember`,
         { useremail: selectedUserEmail, role: selectedRole },
         { withCredentials: true }
       );
@@ -244,7 +245,7 @@ const InsideProject = () => {
         endDate: editEndDate || null,
         overallStatus: editOverallStatus,
       };
-      await axios.put(`http://localhost:3000/project/${projectID}`, updatedData, { withCredentials: true });
+      await axios.put(`${BACKEND_URL}/project/${projectID}`, updatedData, { withCredentials: true });
       // Use custom message box instead of alert
       console.log('Project updated successfully!');
       queryClient.invalidateQueries(['projectDetails', projectID]);
@@ -264,7 +265,7 @@ const InsideProject = () => {
       return;
     }
     try {
-      await axios.delete(`http://localhost:3000/project/${projectID}`, { withCredentials: true });
+      await axios.delete(`${BACKEND_URL}/project/${projectID}`, { withCredentials: true });
       // Use custom message box instead of alert
       console.log('Project deleted successfully!');
       queryClient.invalidateQueries(['projectList']); // Invalidate list of projects
@@ -279,7 +280,7 @@ const InsideProject = () => {
   const handleRemoveMember = async () => {
     if (!memberToRemove || !projectID) return;
     try {
-      await axios.delete(`http://localhost:3000/project/${projectID}/removemember`, {
+      await axios.delete(`${BACKEND_URL}/project/${projectID}/removemember`, {
         data: { userId: memberToRemove.user }, // Send userId in data for DELETE request body
         withCredentials: true
       });

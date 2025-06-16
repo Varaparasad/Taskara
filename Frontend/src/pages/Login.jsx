@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Loader2 } from 'lucide-react'; 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const passwordRules = [
     { regex: /.{6,}/, message: "Password must be at least 6 characters." },
@@ -71,7 +72,7 @@ const Login = () => {
             try {
                 if (isLogin) {
                     
-                    const res = await axios.post("http://localhost:3000/user/login", {
+                    const res = await axios.post(`${BACKEND_URL}/user/login`, {
                         email: fields.email,
                         password: fields.password,
                     }, { withCredentials: true });
@@ -86,7 +87,7 @@ const Login = () => {
                     navigate(redirectUrl);
                 } else {
                     
-                    const res = await axios.post("http://localhost:3000/user/signup", {
+                    const res = await axios.post(`${BACKEND_URL}/user/signup`, {
                         email: fields.email,
                         name: fields.username,
                         password: fields.password,

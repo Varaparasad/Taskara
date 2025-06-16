@@ -3,9 +3,10 @@ import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
 import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query'; 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const fetchMyTickets = async () => {
-  const res = await axios.get('http://localhost:3000/user/mytickets', { withCredentials: true });
+  const res = await axios.get(`${BACKEND_URL}/user/mytickets`, { withCredentials: true });
   return res.data.data;
 };
 
@@ -15,7 +16,7 @@ const fetchProjectById = async (projectId) => {
     return null;
   }
 
-  const res = await axios.get(`http://localhost:3000/project/${projectId}`, { withCredentials: true });
+  const res = await axios.get(`${BACKEND_URL}/project/${projectId}`, { withCredentials: true });
   return res.data.data;
 };
 

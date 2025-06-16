@@ -6,6 +6,7 @@ import { User, Loader2, Users, Briefcase, ClipboardList } from "lucide-react";
 import { FaTasks, FaProjectDiagram } from 'react-icons/fa';
 import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from "react-router-dom";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Import Chart.js components
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
@@ -29,13 +30,13 @@ const statusColor = {
 // --- Data Fetching Functions ---
 
 const fetchUserData = async () => {
-  const resp = await axios.get("http://localhost:3000/user/data", { withCredentials: true });
+  const resp = await axios.get(`${BACKEND_URL}/user/data`, { withCredentials: true });
   if (!resp.data.success) throw new Error("Failed to fetch user data");
   return resp.data.user;
 };
 
 const fetchTicketsSummary = async () => {
-  const resp = await axios.get("http://localhost:3000/user/myticketslength", { withCredentials: true });
+  const resp = await axios.get(`${BACKEND_URL}/user/myticketslength`, { withCredentials: true });
   if (!resp.data.success) throw new Error("Failed to fetch ticket summary");
   return resp.data.data;
 };
@@ -45,12 +46,12 @@ const fetchProjectAndManagerDetails = async ({ queryKey }) => {
   const projectId = projectData.projectID;
   const userProjectStatus = projectData.status;
 
-  const projectRes = await axios.get(`http://localhost:3000/project/${projectId}`, { withCredentials: true });
+  const projectRes = await axios.get(`${BACKEND_URL}/project/${projectId}`, { withCredentials: true });
   const project = projectRes.data.data;
 
   let managerName = "Unknown";
   if (project.CreatedBy) {
-    const managerRes = await axios.get(`http://localhost:3000/user/${project.CreatedBy}`, { withCredentials: true });
+    const managerRes = await axios.get(`${BACKEND_URL}/user/${project.CreatedBy}`, { withCredentials: true });
     const manager = managerRes.data.data;
     managerName = manager.name || manager.username || "Unknown";
   }
