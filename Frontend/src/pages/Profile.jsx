@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import Sidebar from '../components/Sidebar.jsx'; // Adjust path as necessary
 import Topbar from '../components/Topbar.jsx';
 import MessageOverlay from '../components/MessageOverlay.jsx'; // Path to the MessageOverlay component
@@ -9,7 +10,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 // Import Lucide React icons
 import {
     User, Mail, Lock, Camera, Edit, Save, X, Loader2,
-    AlertCircle, CheckCircle, XCircle, Info, KeyRound, Image // Removed BookOpenText as projects section is gone
+    AlertCircle, CheckCircle, XCircle, Info, KeyRound, Image, LogOut // Added LogOut icon
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -44,6 +45,7 @@ const Profile = () => {
     const [profilePicInput, setProfilePicInput] = useState(''); // For the URL input
 
     const queryClient = useQueryClient();
+    const navigate = useNavigate(); // Initialize useNavigate
 
     const { data: userData, isLoading, isError, error } = useQuery({
         queryKey: ['userData'],
@@ -109,7 +111,7 @@ const Profile = () => {
             return;
         }
         try {
-            await axios.put('${BACKEND_URL}/user/update', { email: editEmail }, { withCredentials: true });
+            await axios.put(`${BACKEND_URL}/user/update`, { email: editEmail }, { withCredentials: true });
             showMessage('Email updated successfully!', 'success');
             queryClient.invalidateQueries(['userData']);
             setShowEditEmailModal(false);
@@ -133,7 +135,7 @@ const Profile = () => {
             return;
         }
         try {
-            await axios.put('${BACKEND_URL}/user/update', { oldPassword, newPassword }, { withCredentials: true });
+            await axios.put(`${BACKEND_URL}/user/update`, { oldPassword, newPassword }, { withCredentials: true });
             showMessage('Password updated successfully!', 'success');
             setOldPassword('');
             setNewPassword('');
@@ -158,6 +160,21 @@ const Profile = () => {
         } catch (err) {
             console.error('Error updating profile picture:', err);
             showMessage('Failed to update profile picture. ' + (err.response?.data?.message || 'Please try a valid URL.'), 'error');
+        }
+    };
+
+    // Logout Function
+    const handleLogout = () => {
+        const confirmLogout = window.confirm('Are you sure you want to logout?');
+        if (confirmLogout) {
+            axios.get(`${BACKEND_URL}/user/logout`, { withCredentials: true })
+                .then(() => {
+                    navigate('/'); // Redirect to login page
+                })
+                .catch(err => {
+                    console.error('Logout failed:', err);
+                    showMessage('Logout failed. Please try again.', 'error');
+                });
         }
     };
 
@@ -244,6 +261,17 @@ const Profile = () => {
                                 Change Password
                             </button>
                         </div>
+                    </div>
+
+                    {/* Logout Button */}
+                    <div className="flex justify-center mt-4">
+                        <button
+                            onClick={handleLogout}
+                            className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg text-sm sm:text-base"
+                        >
+                            <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                            Logout
+                        </button>
                     </div>
                 </div>
             </div>

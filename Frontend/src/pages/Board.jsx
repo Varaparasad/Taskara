@@ -152,7 +152,7 @@ const Board = () => {
   const { data: currentUser, isLoading: isLoadingCurrentUser, isError: isErrorCurrentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
-    staleTime: Infinity, 
+    staleTime: Infinity,
   });
 
   const loading = isLoadingTickets || isLoadingProjectDetails || isLoadingCurrentUser;
@@ -293,7 +293,7 @@ const Board = () => {
     queryClient.setQueryData(['projectTickets', projectID], updatedTickets);
 
     try {
-      
+
       await axios.put(
         `${BACKEND_URL}/ticket/${draggableId}/changestatus`,
         { status: newStatus },
@@ -378,347 +378,352 @@ const Board = () => {
             {/* Board Header and Buttons */}
             <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 animate-fadeIn transition-all duration-500">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <Kanban className="text-blue-600" /> Kanban Board for: <span className="line-clamp-1">{projectDetails?.title || projectID}</span>
+                {/* Adjusted h2 for better alignment and controlled wrapping */}
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 flex-wrap min-w-0">
+                  <Kanban className="text-blue-600 flex-shrink-0" /> {/* flex-shrink-0 to keep icon from shrinking */}
+                  <span className="flex-shrink-0">Kanban Board for:</span> {/* Ensure "Kanban Board for:" doesn't wrap oddly */}
+                  <span className="ml-1 flex-auto line-clamp-1">{projectDetails?.title || projectID}</span> {/* flex-auto allows it to grow/shrink, line-clamp for ellipsis */}
                 </h2>
-                <div className="flex flex-wrap gap-3">
-                  {/* **NEW: Filter Dropdown** */}
-                  <div className="relative">
-                    <select
-                      value={ticketFilter}
-                      onChange={(e) => setTicketFilter(e.target.value)}
-                      className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-                    >
-                      <option value="all">All Tickets</option>
-                      <option value="assignedToMe">Assigned to Me</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
-                    </div>
+                {/* **NEW: Filter Dropdown** */}
+                <div className="relative">
+                  <select
+                    value={ticketFilter}
+                    onChange={(e) => setTicketFilter(e.target.value)}
+                    className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+                  >
+                    <option value="all">All Tickets</option>
+                    <option value="assignedToMe">Assigned to Me</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
                   </div>
-
-                  <button
-                    onClick={() => navigate(`/${projectID}/tickets`)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
-                  >
-                    <ChevronRight className="w-5 h-5 -rotate-180" /> Back to Tickets
-                  </button>
-                  <button
-                    onClick={() => setShowCreateTicketModal(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
-                  >
-                    <PlusCircle className="w-5 h-5" /> Create New Ticket
-                  </button>
                 </div>
+
+                <button
+                  onClick={() => navigate(`/${projectID}/tickets`)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                >
+                  <ChevronRight className="w-5 h-5 -rotate-180" /> Back to Tickets
+                </button>
+                <button
+                  onClick={() => setShowCreateTicketModal(true)}
+                  className="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                >
+                  <PlusCircle className="w-5 h-5" /> Create New Ticket
+                </button>
               </div>
             </div>
 
-            {/* Kanban Board Layout */}
-            <DragDropContext onDragEnd={onDragEnd}>
-              <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-200px)] overflow-x-auto pb-4">
-                {Object.values(columns).map(column => (
-                  <Droppable key={column.id} droppableId={column.id}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`flex-1 min-w-[280px] bg-gray-100 rounded-xl shadow-inner p-4 flex flex-col transition-all duration-200 ease-in-out
+        {/* Kanban Board Layout */}
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-200px)] overflow-x-auto pb-4">
+            {Object.values(columns).map(column => (
+              <Droppable key={column.id} droppableId={column.id}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`flex-1 min-w-[280px] bg-gray-100 rounded-xl shadow-inner p-4 flex flex-col transition-all duration-200 ease-in-out
                           ${snapshot.isDraggingOver ? 'bg-blue-50 ring-2 ring-blue-400' : 'bg-gray-100'}`
-                        }
-                      >
-                        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center justify-between">
-                          {column.title}
-                          <span className="text-gray-500 text-sm font-normal bg-gray-200 px-2 py-0.5 rounded-full">
-                            {column.items.length}
-                          </span>
-                        </h3>
-                        <div className="flex-grow overflow-y-auto space-y-4 pr-1"> {/* pr-1 for scrollbar */}
-                          {column.items.length === 0 ? (
-                            <p className="text-gray-500 text-sm italic text-center py-4">No tickets here.</p>
-                          ) : (
-                            column.items.map((ticket, index) => (
-                              <Draggable key={ticket._id} draggableId={ticket._id} index={index}>
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    className={`bg-white rounded-lg shadow-md p-4 space-y-2 border border-gray-200 cursor-grab
+                    }
+                  >
+                    <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center justify-between">
+                      {column.title}
+                      <span className="text-gray-500 text-sm font-normal bg-gray-200 px-2 py-0.5 rounded-full">
+                        {column.items.length}
+                      </span>
+                    </h3>
+                    <div className="flex-grow overflow-y-auto space-y-4 pr-1"> {/* pr-1 for scrollbar */}
+                      {column.items.length === 0 ? (
+                        <p className="text-gray-500 text-sm italic text-center py-4">No tickets here.</p>
+                      ) : (
+                        column.items.map((ticket, index) => (
+                          <Draggable key={ticket._id} draggableId={ticket._id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`bg-white rounded-lg shadow-md p-4 space-y-2 border border-gray-200 cursor-grab
                                       ${snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-300' : 'hover:shadow-lg transition-shadow duration-200'}
                                     `}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <h4 className="font-semibold text-gray-900 line-clamp-1">{ticket.title}</h4>
+                                  <button
+                                    onClick={() => openEditModal(ticket)}
+                                    className="text-gray-400 hover:text-blue-600 transition-colors duration-200"
+                                    title="Edit Ticket"
                                   >
-                                    <div className="flex items-center justify-between">
-                                      <h4 className="font-semibold text-gray-900 line-clamp-1">{ticket.title}</h4>
-                                      <button
-                                        onClick={() => openEditModal(ticket)}
-                                        className="text-gray-400 hover:text-blue-600 transition-colors duration-200"
-                                        title="Edit Ticket"
-                                      >
-                                        <Pencil className="w-4 h-4" />
-                                      </button>
-                                    </div>
-                                    <p className="text-sm text-gray-600 line-clamp-2">{ticket.description}</p>
-                                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                                      <span className={`px-2 py-0.5 rounded-full font-medium ${getPriorityColorClass(ticket.priority)}`}>
-                                        {ticket.priority}
-                                      </span>
-                                      <span className={`px-2 py-0.5 rounded-full font-medium ${getTicketStatusColorClass(ticket.status)}`}>
-                                        {ticket.status}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1 text-sm text-gray-700">
-                                      <User className="w-4 h-4 text-gray-500" />
-                                      <span>{ticket.assigneeName}</span>
-                                    </div>
-                                    {ticket.DueDate && (
-                                      <div className="flex items-center gap-1 text-sm text-gray-700">
-                                        <CalendarDays className="w-4 h-4 text-gray-500" />
-                                        <span>{format(new Date(ticket.DueDate), 'MMM dd, yyyy')}</span>
-                                      </div>
-                                    )}
+                                    <Pencil className="w-4 h-4" />
+                                  </button>
+                                </div>
+                                <p className="text-sm text-gray-600 line-clamp-2">{ticket.description}</p>
+                                <div className="flex flex-wrap items-center gap-2 text-xs">
+                                  <span className={`px-2 py-0.5 rounded-full font-medium ${getPriorityColorClass(ticket.priority)}`}>
+                                    {ticket.priority}
+                                  </span>
+                                  <span className={`px-2 py-0.5 rounded-full font-medium ${getTicketStatusColorClass(ticket.status)}`}>
+                                    {ticket.status}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1 text-sm text-gray-700">
+                                  <User className="w-4 h-4 text-gray-500" />
+                                  <span>{ticket.assigneeName}</span>
+                                </div>
+                                {ticket.DueDate && (
+                                  <div className="flex items-center gap-1 text-sm text-gray-700">
+                                    <CalendarDays className="w-4 h-4 text-gray-500" />
+                                    <span>{format(new Date(ticket.DueDate), 'MMM dd, yyyy')}</span>
                                   </div>
                                 )}
-                              </Draggable>
-                            ))
-                          )}
-                          {provided.placeholder}
-                        </div>
-                      </div>
-                    )}
-                  </Droppable>
-                ))}
-              </div>
-            </DragDropContext>
-          </>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))
+                      )}
+                      {provided.placeholder}
+                    </div>
+                  </div>
+                )}
+              </Droppable>
+            ))}
+          </div>
+        </DragDropContext>
+      </>
         )}
+    </div>
+
+      {/* Create Ticket Modal (Same as ProjectTicketsPage) */ }
+  {
+    showCreateTicketModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+        <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg animate-scaleIn">
+          <div className="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 className="text-2xl font-bold text-gray-800">Create New Ticket</h3>
+            <button onClick={closeCreateTicketModal} className="text-gray-500 hover:text-gray-700 text-3xl font-bold leading-none">
+              <XCircle className="w-8 h-8" />
+            </button>
+          </div>
+          <form onSubmit={handleCreateTicket} className="space-y-4">
+            <div>
+              <label htmlFor="ticket-title" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <input
+                type="text"
+                id="ticket-title"
+                value={ticketTitle}
+                onChange={(e) => setTicketTitle(e.target.value)}
+                placeholder="Ticket title (e.g., Bug: Login failed)"
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="ticket-description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                id="ticket-description"
+                value={ticketDescription}
+                onChange={(e) => setTicketDescription(e.target.value)}
+                rows="4"
+                placeholder="Detailed description of the issue or task"
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                required
+              ></textarea>
+            </div>
+            <div>
+              <label htmlFor="ticket-priority" className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+              <select
+                id="ticket-priority"
+                value={ticketPriority}
+                onChange={(e) => setTicketPriority(e.target.value)}
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="ticket-duedate" className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+              <input
+                type="date"
+                id="ticket-duedate"
+                value={ticketDueDate}
+                onChange={(e) => setTicketDueDate(e.target.value)}
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="ticket-assignee" className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
+              <input
+                type="text"
+                id="ticket-assignee"
+                value={assigneeSearchInput}
+                onChange={(e) => {
+                  setAssigneeSearchInput(e.target.value);
+                  setSelectedAssignee(null); // Clear selected assignee if input changes
+                }}
+                placeholder="Search project members by name or email"
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoComplete="off"
+              />
+              {assigneeSuggestions.length > 0 && !selectedAssignee && assigneeSearchInput.trim().length > 0 && (
+                <ul className="border border-gray-200 rounded-lg bg-white mt-2 max-h-48 overflow-y-auto shadow-md">
+                  {assigneeSuggestions.map((member) => (
+                    <li
+                      key={member._id}
+                      onClick={() => handleAssigneeSelect(member)}
+                      className="px-4 py-2 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm border-b border-gray-100 last:border-b-0"
+                    >
+                      {member.userName} ({member.userEmail}) <span className="text-gray-500 capitalize">({member.role})</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {selectedAssignee && (
+                <p className="mt-2 text-sm text-gray-600">
+                  Assigned to: <strong className="text-blue-700">{selectedAssignee.userName} ({selectedAssignee.userEmail})</strong>
+                </p>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end space-x-3 border-t pt-4">
+              <button
+                type="button"
+                onClick={closeCreateTicketModal}
+                className="px-5 py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium transition duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!ticketTitle || !ticketDescription || !selectedAssignee}
+              >
+                Create Ticket
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
+    )
+  }
 
-      {/* Create Ticket Modal (Same as ProjectTicketsPage) */}
-      {showCreateTicketModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg animate-scaleIn">
-            <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h3 className="text-2xl font-bold text-gray-800">Create New Ticket</h3>
-              <button onClick={closeCreateTicketModal} className="text-gray-500 hover:text-gray-700 text-3xl font-bold leading-none">
-                <XCircle className="w-8 h-8" />
+  {/* Edit Ticket Modal (New) */ }
+  {
+    showEditTicketModal && editingTicket && (
+      <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+        <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg animate-scaleIn">
+          <div className="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 className="text-2xl font-bold text-gray-800">Edit Ticket</h3>
+            <button onClick={closeEditTicketModal} className="text-gray-500 hover:text-gray-700 text-3xl font-bold leading-none">
+              <XCircle className="w-8 h-8" />
+            </button>
+          </div>
+          <form onSubmit={handleEditTicket} className="space-y-4">
+            <div>
+              <label htmlFor="edit-ticket-title" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <input
+                type="text"
+                id="edit-ticket-title"
+                value={ticketTitle}
+                onChange={(e) => setTicketTitle(e.target.value)}
+                placeholder="Ticket title"
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-ticket-description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                id="edit-ticket-description"
+                value={ticketDescription}
+                onChange={(e) => setTicketDescription(e.target.value)}
+                rows="4"
+                placeholder="Detailed description"
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                required
+              ></textarea>
+            </div>
+            <div>
+              <label htmlFor="edit-ticket-priority" className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+              <select
+                id="edit-ticket-priority"
+                value={ticketPriority}
+                onChange={(e) => setTicketPriority(e.target.value)}
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="edit-ticket-duedate" className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+              <input
+                type="date"
+                id="edit-ticket-duedate"
+                value={ticketDueDate}
+                onChange={(e) => setTicketDueDate(e.target.value)}
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-ticket-assignee" className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
+              <input
+                type="text"
+                id="edit-ticket-assignee"
+                value={assigneeSearchInput}
+                onChange={(e) => {
+                  setAssigneeSearchInput(e.target.value);
+                  setSelectedAssignee(null); // Clear selected assignee if input changes
+                }}
+                placeholder="Search project members by name or email"
+                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoComplete="off"
+              />
+              {assigneeSuggestions.length > 0 && !selectedAssignee && assigneeSearchInput.trim().length > 0 && (
+                <ul className="border border-gray-200 rounded-lg bg-white mt-2 max-h-48 overflow-y-auto shadow-md">
+                  {assigneeSuggestions.map((member) => (
+                    <li
+                      key={member._id}
+                      onClick={() => handleAssigneeSelect(member)}
+                      className="px-4 py-2 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm border-b border-gray-100 last:border-b-0"
+                    >
+                      {member.userName} ({member.userEmail}) <span className="text-gray-500 capitalize">({member.role})</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {selectedAssignee && (
+                <p className="mt-2 text-sm text-gray-600">
+                  Assigned to: <strong className="text-blue-700">{selectedAssignee.userName} ({selectedAssignee.userEmail})</strong>
+                </p>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end space-x-3 border-t pt-4">
+              <button
+                type="button"
+                onClick={closeEditTicketModal}
+                className="px-5 py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium transition duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!ticketTitle || !ticketDescription || !selectedAssignee}
+              >
+                Save Changes
               </button>
             </div>
-            <form onSubmit={handleCreateTicket} className="space-y-4">
-              <div>
-                <label htmlFor="ticket-title" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <input
-                  type="text"
-                  id="ticket-title"
-                  value={ticketTitle}
-                  onChange={(e) => setTicketTitle(e.target.value)}
-                  placeholder="Ticket title (e.g., Bug: Login failed)"
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="ticket-description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  id="ticket-description"
-                  value={ticketDescription}
-                  onChange={(e) => setTicketDescription(e.target.value)}
-                  rows="4"
-                  placeholder="Detailed description of the issue or task"
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-                  required
-                ></textarea>
-              </div>
-              <div>
-                <label htmlFor="ticket-priority" className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                <select
-                  id="ticket-priority"
-                  value={ticketPriority}
-                  onChange={(e) => setTicketPriority(e.target.value)}
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="ticket-duedate" className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-                <input
-                  type="date"
-                  id="ticket-duedate"
-                  value={ticketDueDate}
-                  onChange={(e) => setTicketDueDate(e.target.value)}
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label htmlFor="ticket-assignee" className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
-                <input
-                  type="text"
-                  id="ticket-assignee"
-                  value={assigneeSearchInput}
-                  onChange={(e) => {
-                    setAssigneeSearchInput(e.target.value);
-                    setSelectedAssignee(null); // Clear selected assignee if input changes
-                  }}
-                  placeholder="Search project members by name or email"
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoComplete="off"
-                />
-                {assigneeSuggestions.length > 0 && !selectedAssignee && assigneeSearchInput.trim().length > 0 && (
-                  <ul className="border border-gray-200 rounded-lg bg-white mt-2 max-h-48 overflow-y-auto shadow-md">
-                    {assigneeSuggestions.map((member) => (
-                      <li
-                        key={member._id}
-                        onClick={() => handleAssigneeSelect(member)}
-                        className="px-4 py-2 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm border-b border-gray-100 last:border-b-0"
-                      >
-                        {member.userName} ({member.userEmail}) <span className="text-gray-500 capitalize">({member.role})</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {selectedAssignee && (
-                  <p className="mt-2 text-sm text-gray-600">
-                    Assigned to: <strong className="text-blue-700">{selectedAssignee.userName} ({selectedAssignee.userEmail})</strong>
-                  </p>
-                )}
-              </div>
-              <div className="mt-6 flex justify-end space-x-3 border-t pt-4">
-                <button
-                  type="button"
-                  onClick={closeCreateTicketModal}
-                  className="px-5 py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium transition duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={!ticketTitle || !ticketDescription || !selectedAssignee}
-                >
-                  Create Ticket
-                </button>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {/* Edit Ticket Modal (New) */}
-      {showEditTicketModal && editingTicket && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg animate-scaleIn">
-            <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h3 className="text-2xl font-bold text-gray-800">Edit Ticket</h3>
-              <button onClick={closeEditTicketModal} className="text-gray-500 hover:text-gray-700 text-3xl font-bold leading-none">
-                <XCircle className="w-8 h-8" />
-              </button>
-            </div>
-            <form onSubmit={handleEditTicket} className="space-y-4">
-              <div>
-                <label htmlFor="edit-ticket-title" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <input
-                  type="text"
-                  id="edit-ticket-title"
-                  value={ticketTitle}
-                  onChange={(e) => setTicketTitle(e.target.value)}
-                  placeholder="Ticket title"
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-ticket-description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  id="edit-ticket-description"
-                  value={ticketDescription}
-                  onChange={(e) => setTicketDescription(e.target.value)}
-                  rows="4"
-                  placeholder="Detailed description"
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-                  required
-                ></textarea>
-              </div>
-              <div>
-                <label htmlFor="edit-ticket-priority" className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                <select
-                  id="edit-ticket-priority"
-                  value={ticketPriority}
-                  onChange={(e) => setTicketPriority(e.target.value)}
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="edit-ticket-duedate" className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-                <input
-                  type="date"
-                  id="edit-ticket-duedate"
-                  value={ticketDueDate}
-                  onChange={(e) => setTicketDueDate(e.target.value)}
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-ticket-assignee" className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
-                <input
-                  type="text"
-                  id="edit-ticket-assignee"
-                  value={assigneeSearchInput}
-                  onChange={(e) => {
-                    setAssigneeSearchInput(e.target.value);
-                    setSelectedAssignee(null); // Clear selected assignee if input changes
-                  }}
-                  placeholder="Search project members by name or email"
-                  className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoComplete="off"
-                />
-                {assigneeSuggestions.length > 0 && !selectedAssignee && assigneeSearchInput.trim().length > 0 && (
-                  <ul className="border border-gray-200 rounded-lg bg-white mt-2 max-h-48 overflow-y-auto shadow-md">
-                    {assigneeSuggestions.map((member) => (
-                      <li
-                        key={member._id}
-                        onClick={() => handleAssigneeSelect(member)}
-                        className="px-4 py-2 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm border-b border-gray-100 last:border-b-0"
-                      >
-                        {member.userName} ({member.userEmail}) <span className="text-gray-500 capitalize">({member.role})</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {selectedAssignee && (
-                  <p className="mt-2 text-sm text-gray-600">
-                    Assigned to: <strong className="text-blue-700">{selectedAssignee.userName} ({selectedAssignee.userEmail})</strong>
-                  </p>
-                )}
-              </div>
-              <div className="mt-6 flex justify-end space-x-3 border-t pt-4">
-                <button
-                  type="button"
-                  onClick={closeEditTicketModal}
-                  className="px-5 py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium transition duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={!ticketTitle || !ticketDescription || !selectedAssignee}
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Tailwind CSS Customizations and Animations */}
-      <style>{`
+  {/* Tailwind CSS Customizations and Animations */ }
+  <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
         .font-inter {
@@ -768,7 +773,7 @@ const Board = () => {
           background: #707070;
         }
       `}</style>
-    </div>
+    </div >
   );
 };
 

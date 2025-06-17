@@ -4,10 +4,19 @@ import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Kanban, PlusCircle, XCircle, LayoutDashboard, CalendarDays, ChevronRight } from 'lucide-react'; // Added ListChecks for project summary
+import {
+  Loader2,
+  Kanban,
+  PlusCircle,
+  XCircle,
+  LayoutDashboard,
+  CalendarDays,
+  ChevronRight, 
+  ChevronLeft
+} from 'lucide-react';
 import { format } from 'date-fns';
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Helper functions (reused from InsideProject.jsx)
 const getPriorityColorClass = (priority) => {
@@ -56,22 +65,21 @@ const fetchProjectDetailsForMembers = async ({ queryKey }) => {
     const projectRes = await axios.get(`${BACKEND_URL}/project/${projectID}`, { withCredentials: true });
     const project = projectRes.data.data;
 
-    // Fetch details for each member to get their names/emails for assignee suggestions
     const membersWithDetails = await Promise.all(
       (project.Members || []).map(async (member) => {
         const userDetails = await fetchUserDetailsById(member.user);
         return {
-          _id: member.user, // Important: keep the user ID for assignment
+          _id: member.user,
           userName: userDetails ? (userDetails.name || userDetails.username || userDetails.email) : 'Unknown User',
           userEmail: userDetails ? userDetails.email : 'N/A',
-          role: member.role // Also useful to know the role
+          role: member.role
         };
       })
     );
     return { ...project, Members: membersWithDetails };
   } catch (err) {
     console.error(`Error fetching project details for ID ${projectID}:`, err);
-    throw err; // Re-throw to be caught by useQuery
+    throw err;
   }
 };
 
@@ -96,18 +104,16 @@ const fetchProjectTickets = async ({ queryKey }) => {
     return ticketsWithAssigneeNames;
   } catch (err) {
     console.error(`Error fetching tickets for project ${projectID}:`, err);
-    throw err; // Re-throw to be caught by useQuery
+    throw err;
   }
 };
 
-// Fetch tickets assigned to the current user
 const fetchMyTickets = async ({ queryKey }) => {
   const [, projectID] = queryKey;
   if (!projectID) return [];
   try {
     const res = await axios.get(`${BACKEND_URL}/project/${projectID}/mytickets`, { withCredentials: true });
     const myTickets = res.data.data;
-    // We still need assigneeName populated on the frontend if the backend doesn't populate it
     const myTicketsWithAssigneeNames = await Promise.all(
       myTickets.map(async (ticket) => {
         let assigneeName = "Unassigned";
@@ -128,45 +134,41 @@ const fetchMyTickets = async ({ queryKey }) => {
 
 const ProjectTickets = () => {
   const { projectID } = useParams();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
 
-  // Form states for creating a ticket
   const [ticketTitle, setTicketTitle] = useState('');
   const [ticketDescription, setTicketDescription] = useState('');
-  const [ticketPriority, setTicketPriority] = useState('low'); // Default priority
-  const [ticketDueDate, setTicketDueDate] = useState(''); // New state for DueDate
+  const [ticketPriority, setTicketPriority] = useState('low');
+  const [ticketDueDate, setTicketDueDate] = useState('');
   const [assigneeSearchInput, setAssigneeSearchInput] = useState('');
   const [assigneeSuggestions, setAssigneeSuggestions] = useState([]);
-  const [selectedAssignee, setSelectedAssignee] = useState(null); // Stores { _id, userName, userEmail }
+  const [selectedAssignee, setSelectedAssignee] = useState(null);
 
-  // State for filtering and sorting
-  const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'assignedToMe', 'all' - Renamed to sortOrder
-  const [statusFilter, setStatusFilter] = useState('all'); // New state for status filter
+  const [sortOrder, setSortOrder] = useState('newest');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const queryClient = useQueryClient();
 
-  // Query for all tickets
   const { data: tickets, isLoading: isLoadingTickets, isError: isErrorTickets, error: ticketsError } = useQuery({
     queryKey: ['projectTickets', projectID],
     queryFn: fetchProjectTickets,
     enabled: !!projectID,
     staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: true, // Ensures re-fetch on window focus for dynamic updates
+    refetchOnWindowFocus: true,
   });
 
-  // Query for tickets assigned to current user
   const { data: myTickets, isLoading: isLoadingMyTickets, isError: isErrorMyTickets, error: myTicketsError } = useQuery({
     queryKey: ['myTickets', projectID],
     queryFn: fetchMyTickets,
-    enabled: !!projectID && sortOrder === 'assignedToMe', // Enabled if sortOrder is 'assignedToMe'
+    enabled: !!projectID && sortOrder === 'assignedToMe',
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
   });
 
   const { data: projectDetails, isLoading: isLoadingProjectDetails, isError: isErrorProjectDetails, error: projectDetailsError } = useQuery({
-    queryKey: ['projectDetailsForMembers', projectID], // Separate query key for members
+    queryKey: ['projectDetailsForMembers', projectID],
     queryFn: fetchProjectDetailsForMembers,
     enabled: !!projectID,
     staleTime: 5 * 60 * 1000,
@@ -178,7 +180,6 @@ const ProjectTickets = () => {
 
 
   useEffect(() => {
-    // Debounce assignee search
     const debounceTimeout = setTimeout(() => {
       if (assigneeSearchInput.trim().length > 0 && projectDetails?.Members) {
         const filteredSuggestions = projectDetails.Members.filter(member =>
@@ -189,24 +190,23 @@ const ProjectTickets = () => {
       } else {
         setAssigneeSuggestions([]);
       }
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => clearTimeout(debounceTimeout);
   }, [assigneeSearchInput, projectDetails?.Members]);
 
   const handleAssigneeSelect = (assignee) => {
     setSelectedAssignee(assignee);
-    setAssigneeSearchInput(assignee.userName); // Display name in input
-    setAssigneeSuggestions([]); // Clear suggestions
+    setAssigneeSearchInput(assignee.userName);
+    setAssigneeSuggestions([]);
   };
 
   const closeCreateTicketModal = () => {
     setShowCreateTicketModal(false);
-    // Reset form fields
     setTicketTitle('');
     setTicketDescription('');
     setTicketPriority('low');
-    setTicketDueDate(''); // Reset DueDate
+    setTicketDueDate('');
     setAssigneeSearchInput('');
     setSelectedAssignee(null);
     setAssigneeSuggestions([]);
@@ -226,19 +226,17 @@ const ProjectTickets = () => {
           title: ticketTitle,
           description: ticketDescription,
           priority: ticketPriority,
-          assignee: selectedAssignee._id, // Send the actual user ID
-          DueDate: ticketDueDate || undefined, // Include DueDate, send undefined if empty
+          assignee: selectedAssignee._id,
+          DueDate: ticketDueDate || undefined,
         },
         { withCredentials: true }
       );
       alert('Ticket created successfully!');
-      // Invalidate to refetch tickets dynamically
       queryClient.invalidateQueries(['projectTickets', projectID]);
-      queryClient.invalidateQueries(['myTickets', projectID]); // Invalidate myTickets query too
+      queryClient.invalidateQueries(['myTickets', projectID]);
       closeCreateTicketModal();
     } catch (err) {
       console.error('Error creating ticket:', err);
-      // More user-friendly error message
       alert('Failed to create ticket. Please ensure all fields are valid and you have permission.');
     }
   };
@@ -257,12 +255,10 @@ const ProjectTickets = () => {
       filteredByStatus = filteredByStatus.filter(ticket => ticket.status === statusFilter);
     }
 
-
     let sorted = [...filteredByStatus];
-    // Sort based on sortOrder
     if (sortOrder === 'oldest') {
       sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    } else { // 'newest', 'all', 'assignedToMe' (after filtering for assignedToMe)
+    } else {
       sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
 
@@ -289,42 +285,43 @@ const ProjectTickets = () => {
           </div>
         ) : (
           <>
-            {/* Tickets Header and Buttons */}
             <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 animate-fadeIn transition-all duration-500">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <Kanban className="text-blue-600" /> Tickets for Project: <span className="line-clamp-1">{projectDetails?.title || projectID}</span>
+                {/* Adjusted h2 for better alignment and controlled wrapping */}
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 flex-wrap min-w-0">
+                  <Kanban className="text-blue-600 flex-shrink-0" /> {/* flex-shrink-0 to keep icon from shrinking */}
+                  <span className="flex-shrink-0">Tickets for Project:</span> {/* Ensure "Tickets for Project:" doesn't wrap oddly */}
+                  <span className="ml-1 flex-auto line-clamp-1">{projectDetails?.title || projectID}</span> {/* flex-auto allows it to grow/shrink, line-clamp for ellipsis */}
                 </h2>
-                <div className="flex flex-wrap gap-3"> 
+                <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                   <button
-                    onClick={() => navigate(`/project/${projectID}`)} 
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                    onClick={() => navigate(`/project/${projectID}`)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm md:text-base"
                   >
-                   <ChevronRight className="w-5 h-5 -rotate-180" /> Project Summary
+                    <ChevronLeft className="w-5 h-5" /> Project Summary
                   </button>
                   <button
-                    onClick={() => navigate(`/${projectID}/board`)} 
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                    onClick={() => navigate(`/${projectID}/board`)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm md:text-base"
                   >
                     <LayoutDashboard className="w-5 h-5" /> Board
                   </button>
                   <button
                     onClick={() => setShowCreateTicketModal(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                    className="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm md:text-base"
                   >
                     <PlusCircle className="w-5 h-5" /> Create New Ticket
                   </button>
                 </div>
               </div>
 
-              {/* Filter Options Dropdowns */}
-              <div className="flex flex-wrap items-center gap-3 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
                 <label htmlFor="sort-filter" className="text-gray-700 font-medium">Sort By:</label>
                 <select
                   id="sort-filter"
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full sm:w-auto"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -334,12 +331,12 @@ const ProjectTickets = () => {
                   <option value="all">All Tickets</option>
                 </select>
 
-                <label htmlFor="status-filter" className="text-gray-700 font-medium ml-4">Status:</label>
+                <label htmlFor="status-filter" className="text-gray-700 font-medium mt-3 sm:mt-0 sm:ml-4">Status:</label>
                 <select
                   id="status-filter"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full sm:w-auto"
                 >
                   <option value="all">All Statuses</option>
                   <option value="todo">To Do</option>
@@ -348,23 +345,22 @@ const ProjectTickets = () => {
                 </select>
               </div>
 
-              {/* Display Tickets */}
               {displayedTickets?.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No tickets found matching your criteria.</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {displayedTickets.map((ticket) => ( 
+                  {displayedTickets.map((ticket) => (
                     <div
-                      key={ticket._id} 
+                      key={ticket._id}
                       className="bg-white rounded-xl shadow-lg p-6 space-y-3 border border-gray-200
-                                 hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out
-                                 transform animate-fadeIn relative pb-12" 
+                                              hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out
+                                              transform animate-fadeIn relative pb-12"
                     >
                       <h3 className="text-xl font-bold text-gray-800 border-b-2 border-blue-500 pb-2 mb-2 line-clamp-1">
                         {ticket.title}
                       </h3>
                       <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">{ticket.description}</p>
-                      <div className="grid grid-cols-2 gap-y-2 text-sm text-gray-700">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-sm text-gray-700">
                         <p>
                           <span className="font-semibold text-blue-700">Priority:</span>
                           <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-medium ${getPriorityColorClass(ticket.priority)}`}>
@@ -391,13 +387,12 @@ const ProjectTickets = () => {
                         Created: {ticket.createdAt ? format(new Date(ticket.createdAt), 'PPP') : 'N/A'}
                       </p>
 
-                      {/* View Details Button */}
                       <div className="absolute bottom-4 right-4">
                         <button
                           onClick={() => navigate(`/tickets/${ticket._id}`)}
                           className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-3 py-1.5 rounded-lg
-                                     transition-colors duration-200 flex items-center gap-1 shadow-md
-                                     focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+                                                      transition-colors duration-200 flex items-center gap-1 shadow-md
+                                                      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
                         >
                           View Details <ChevronRight className="w-4 h-4" />
                         </button>
@@ -411,14 +406,13 @@ const ProjectTickets = () => {
         )}
       </div>
 
-      {/* Create Ticket Modal */}
       {showCreateTicketModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg animate-scaleIn">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
               <h3 className="text-2xl font-bold text-gray-800">Create New Ticket</h3>
               <button onClick={closeCreateTicketModal} className="text-gray-500 hover:text-gray-700 text-3xl font-bold leading-none">
-                <XCircle className="w-8 h-8"/>
+                <XCircle className="w-8 h-8" />
               </button>
             </div>
             <form onSubmit={handleCreateTicket} className="space-y-4">
@@ -477,7 +471,7 @@ const ProjectTickets = () => {
                   value={assigneeSearchInput}
                   onChange={(e) => {
                     setAssigneeSearchInput(e.target.value);
-                    setSelectedAssignee(null); // Clear selected assignee if input changes
+                    setSelectedAssignee(null);
                   }}
                   placeholder="Search project members by name or email"
                   className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -523,7 +517,6 @@ const ProjectTickets = () => {
         </div>
       )}
 
-      {/* Tailwind CSS Customizations and Animations */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
