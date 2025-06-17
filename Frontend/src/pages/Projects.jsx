@@ -22,7 +22,7 @@ const fetchProjectDetails = async (projectId) => {
 
 const fetchProjectTickets = async (projectId) => {
   const res = await axios.get(`${BACKEND_URL}/project/${projectId}/tickets`, { withCredentials: true });
-  console.log(res.data.data,"in fetchProjectTickets");
+  // console.log(res.data.data,"in fetchProjectTickets");
   return res.data.data || [];
 };
 

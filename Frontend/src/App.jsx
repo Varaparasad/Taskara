@@ -27,7 +27,7 @@ const App = () => {
                     <Route path="/project/:id" element={<InsideProject />} />
                     <Route path="/:projectID/tickets" element={<ProjectTickets />} />
                     <Route path="/:projectID/board" element={<Board />} />
-                    <Route path="/accept-invitation/:projectID/:token" element={<AcceptInvitation />} />
+                    <Route path="/project/accept-invitation/:projectID/:token" element={<AcceptInvitation />} />
                     <Route path="/tickets/:ticketID" element={<TicketDetails />} />
                 </Routes>
         </Router>

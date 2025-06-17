@@ -4,15 +4,21 @@ import cookieParser from 'cookie-parser'
 const app=express()
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { verifyJWT } from './src/middlewares/auth.middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // 
+const allowedOrigins = ['http://localhost:5173', 'https://taskara-1-9gnl.onrender.com'];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN, // your frontend
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true // allow cookies or authorization headers if used
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
 
 

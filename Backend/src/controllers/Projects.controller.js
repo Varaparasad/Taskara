@@ -100,7 +100,7 @@ const addMember = asynchandler(async (req, res) => {
 
         // **Construct the invitation link with the raw token**
         // The token needs to be raw in the URL for the frontend to read it
-        const invitationLink = `${process.env.FRONTEND_ORIGIN}/accept-invitation/${projectID}/${invitationToken}`; // IMPORTANT: Include the token
+        const invitationLink = `${process.env.FRONTEND_ORIGIN}/project/accept-invitation/${projectID}/${invitationToken}`; // IMPORTANT: Include the token
 
         // **Send the invitation email**
         const emailSubject = `Project Invitation: You've been invited to ${project.title}`;
