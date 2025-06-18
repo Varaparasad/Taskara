@@ -58,8 +58,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
             {/* Logo/Brand */}
             <div className="p-4 font-bold text-xl border-b border-gray-700 flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-orange-600 flex items-center justify-center font-black text-black text-sm">⭘</div>
-                Promage
+                {/* <div className="w-6 h-6 rounded-full bg-orange-600 flex items-center justify-center font-black text-black text-sm">⭘</div> */}
+                <img src='/logo.png' alt="" width='35px' />
+                Taskara
             </div>
 
             {/* Navigation */}

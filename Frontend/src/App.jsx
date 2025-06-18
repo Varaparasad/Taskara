@@ -11,6 +11,7 @@ import Board from './pages/Board.jsx';
 import AcceptInvitation from './pages/AcceptInvitation.jsx';
 import TicketDetails from './pages/TicketDetails.jsx';
 import Profile from './pages/Profile.jsx';
+import Landing from './pages/Landing.jsx';
 
 
 
@@ -18,7 +19,8 @@ const App = () => {
     return (
         <Router>
                 <Routes>
-                    <Route path="/" element={<Login />} />
+                    <Route path='/' element={<Landing />} />
+                    <Route path="/user/auth" element={<Login />} />
                     <Route path="/user/dashboard" element={<Dashboard />} />
                     <Route path="/user/profile" element={<Profile />} />
                     <Route path="/projects" element={<Projects />} />
